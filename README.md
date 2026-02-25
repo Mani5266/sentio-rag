@@ -1,84 +1,102 @@
-# Sentio-RAG — Privacy-Preserving Retrieval Augmented Generation
+# 🔐 SentioShield — Universal Privacy-Preserving Document QA
 
-Sentio-RAG is a privacy-preserving RAG system that enables LLM-based question answering over emails while preventing leakage of sensitive information.
+SentioShield is a privacy-first document intelligence system that anonymizes sensitive information before sending content to Large Language Models (LLMs).
 
-Instead of naive redaction, Sentio applies semantic anonymization: identities are replaced with role-aware placeholders, financial values are generalized, dates are abstracted, and epsilon-controlled randomness is introduced to model privacy–utility tradeoffs.
+Unlike traditional DP-RAG systems that perturb entire documents, SentioShield performs **span-level anonymization**, masking only high-risk regions while preserving useful context.
 
-Only masked content is embedded and stored in the vector database.
+Supports: PDFs, DOCX, TXT, Images (OCR), Web URLs, Raw Text.
 
 ---
 
-## ✨ Features
+## 🚀 Features
 
-- PII detection (Person, Org, Email, Phone, Money, Date)
-- Canonical entity resolution (same person → same placeholder)
-- Role-aware masking (Vendor / Requester / Approver / Compliance)
-- Money bucketing (₹68,200 → tens of thousands of dollars)
+- Layout-aware PDF ingestion (Unstructured)
+- Transformer NER (BERT)
+- Indian name support with fallback regex
+- Person / Organization masking
+- Student ID masking
+- Email & Phone masking
+- Money bucketing (₹42,750 → tens of thousands)
 - Date generalization (April 12 → mid April)
-- ε-controlled randomized anonymization
-- Privacy attack simulation (re-identification attempts)
-- QA benchmarking (raw vs masked)
-- Privacy–utility curve (ε vs accuracy)
-- Masked Retrieval-Augmented Generation using ChromaDB
-- Streamlit demo UI
+- Entity mapping transparency
+- LLM Question Answering on anonymized text
+- Summarization
 
 ---
 
-## 🏗 Architecture
+## 🧠 Architecture
 
-Email  
-→ PII Detection  
-→ Semantic + Role Anonymization (ε-noise)  
-→ Masked Embeddings  
-→ ChromaDB  
-→ Retriever  
-→ LLM QA  
-
-Raw data is never stored in the vector database.
+Document → Layout Parser → Transformer NER → Span Detection → Anonymizer → Masked Text → LLM QA
 
 ---
 
-## 📂 Project Structure
+## 🧩 Tech Stack
 
-sentio_backend.py # Core anonymization + privacy engine
-app.py # Streamlit demo
-rag_index.py # Index masked emails into ChromaDB
-rag_query.py # Query masked DB + LLM
-benchmark.py # QA utility benchmarking
-epsilon_eval.py # Privacy–utility evaluation
-chroma_db/ # Persistent masked embeddings
+Python, Streamlit  
+Transformers (dslim/bert-base-NER, FLAN-T5)  
+Unstructured (PDF parsing)  
+SentenceTransformers  
+Presidio  
+scikit-learn  
+pytesseract  
 
+---
+
+## 📂 Structure
+
+
+ActualProject/
+├── app.py
+├── ingest.py
+├── sentio_universal_backend.py
+├── sentio_backend.py
+├── rag_index.py
+├── rag_query.py
+├── benchmark.py
+├── epsilon_eval.py
+└── README.md
 
 
 ---
 
-## 🚀 How to Run
-
-### Install dependencies
+## ⚙ Installation
 
 ```bash
-pip install spacy presidio-analyzer sentence-transformers chromadb streamlit transformers
-python -m spacy download en_core_web_lg
+pip install streamlit transformers sentence-transformers presidio-analyzer scikit-learn
+pip install "unstructured[pdf]" pdfminer.six pillow pytesseract beautifulsoup4 requests
 
+Windows: install Tesseract OCR separately.
 
-Run demo
+▶ Run
 streamlit run app.py
+🧪 Sample Input
+1. J.Mani – 23071A6724
+2. T.Venkat Vishnu – 23071A6761
 
-Build RAG index
-python rag_index.py
+Reviewed by Apex Compliance Pvt Ltd on April 12.
+Contact: venkat.vishnu@gmail.com or +91 9988776655
+Cost: ₹42,750
+Deployment: March 25
+🔒 Masked Output
+1. [Person_1] – [StudentID_1]
+2. [Person_2] – [StudentID_2]
 
-Query RAG
-python rag_query.py
+Reviewed by [Org_1] on mid April.
+Contact: [Email_1] or [Phone_1]
+Cost: tens of thousands
+Deployment: late March
+🧩 Mapping
+{
+  "J Mani": "Person_1",
+  "23071A6724": "StudentID_1",
+  "Apex Compliance Pvt Ltd": "Org_1",
+  "venkat.vishnu@gmail.com": "Email_1",
+  "+91 9988776655": "Phone_1"
+}
+❓ Sample Questions
 
-Benchmark utility
-python benchmark.py
+Who reviewed the project?
 
-Evaluate epsilon tradeoff
-python epsilon_eval.py
+What is deployment timeline?
 
-📊 Evaluation
-
-QA accuracy before vs after anonymization
-Semantic similarity
-ε vs accuracy curve
-Adversarial re-identification attempts
+How much is the cost?
